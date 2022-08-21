@@ -6,8 +6,43 @@ import {
     useRef,
     onMounted,
     useState,
+    reactive,
+    useEnv,
 } from './owl.js';
 console.log('hello owl', __info__.version);
+
+// -------------------------------------------------------------------------
+// Task List
+// -------------------------------------------------------------------------
+class TaskList {
+    nextId = 1;
+    task_list = [];
+
+    addTask(text) {
+        text = text.trim();
+        if (text) {
+            const task = {
+                id: this.nextId++,
+                text: text,
+                isCompleted: false,
+            };
+            this.task_list.push(task);
+        }
+    }
+
+    toggleTask(task) {
+        task.isCompleted = !task.isCompleted;
+    }
+
+    deleteTask(task) {
+        const index = this.task_list.findIndex((t) => t.id === task.id);
+        this.task_list.splice(index, 1);
+    }
+}
+
+function createTaskStore() {
+    return reactive(new TaskList());
+}
 
 // -------------------------------------------------------------------------
 // Task Component
@@ -21,17 +56,16 @@ class Task extends Component {
         <input
             type="checkbox"
             t-att-checked="props.task.isCompleted"
-            t-on-click="toggleTask"
+            t-on-click="() => store.toggleTask(props.task)"
         />
         <span><t t-esc="props.task.text"/></span>
-        <span class="delete" t-on-click="deleteTask">D</span>
+        <span class="delete" t-on-click="() => store.deleteTask(props.task)">🗑</span>
     </div>`;
-    static props = ['task', 'onDelete'];
-    toggleTask() {
-        this.props.task.isCompleted = !this.props.task.isCompleted;
-    }
-    deleteTask() {
-        this.props.onDelete(this.props.task);
+
+    static props = ['task'];
+
+    setup() {
+        this.store = useEnv().store;
     }
 }
 
@@ -43,44 +77,32 @@ class Root extends Component {
     <div class="todo-app">
         <input placeholder="Enter a new task"  t-on-keyup="addTask" t-ref="add-input" />
         <div class="task-list">
-            <t t-foreach="task_list" t-as="task" t-key="task.id">
-                <Task task="task" onDelete.bind="deleteTask" />
+            <t t-foreach="store.task_list" t-as="task" t-key="task.id">
+                <Task task="task" />
             </t>
         </div>
     </div>`;
     static components = { Task };
 
-    nextId = 1;
-    task_list = useState([]);
-
     addTask(ev) {
         // 13 is keycode for ENTER
         if (ev.keyCode === 13) {
-            const text = ev.target.value.trim();
+            this.store.addTask(ev.target.value);
             ev.target.value = '';
-            if (text) {
-                const newTask = {
-                    id: this.nextId++,
-                    text: text,
-                    isCompleted: false,
-                };
-                this.task_list.push(newTask);
-            }
         }
     }
 
     setup() {
         const inputRef = useRef('add-input');
         onMounted(() => inputRef.el.focus());
-    }
-
-    deleteTask(task) {
-        const index = this.task_list.findIndex((t) => t.id === task.id);
-        this.task_list.splice(index, 1);
+        this.store = useState(useEnv().store);
     }
 }
 
 // -------------------------------------------------------------------------
 // Setup
 // -------------------------------------------------------------------------
-mount(Root, document.body, { dev: true });
+const env = {
+    store: createTaskStore(),
+};
+mount(Root, document.body, { dev: true, env });
