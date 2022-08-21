@@ -11,7 +11,17 @@
 .task {
     font-size: 18px;
     color: #111111;
+    display: grid;
+    grid-template-columns: 30px auto 30px;
+}
+.task > input {
+    margin: auto;
 }
 .task.done {
     opacity: 0.7;
+    color: green;
+}
+.delete {
+    cursor: pointer;
+    text-align: center;
 }
