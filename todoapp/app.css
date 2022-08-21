@@ -21,6 +21,12 @@
     opacity: 0.7;
     color: green;
 }
+.task:hover {
+    background-color: #def0ff;
+}
+.task.done label {
+    text-decoration: line-through;
+}
 .delete {
     cursor: pointer;
     text-align: center;
