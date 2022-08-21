@@ -15,8 +15,11 @@ console.log('hello owl', __info__.version);
 // Task List
 // -------------------------------------------------------------------------
 class TaskList {
-    nextId = 1;
-    task_list = [];
+    constructor(tasks) {
+        this.tasks = tasks || [];
+        const taskIds = this.tasks.map((t) => t.id);
+        this.nextId = taskIds.length ? Math.max(...taskIds) + 1 : 1;
+    }
 
     addTask(text) {
         text = text.trim();
@@ -26,7 +29,7 @@ class TaskList {
                 text: text,
                 isCompleted: false,
             };
-            this.task_list.push(task);
+            this.tasks.push(task);
         }
     }
 
@@ -35,13 +38,18 @@ class TaskList {
     }
 
     deleteTask(task) {
-        const index = this.task_list.findIndex((t) => t.id === task.id);
-        this.task_list.splice(index, 1);
+        const index = this.tasks.findIndex((t) => t.id === task.id);
+        this.tasks.splice(index, 1);
     }
 }
 
 function createTaskStore() {
-    return reactive(new TaskList());
+    const saveTasks = () =>
+        localStorage.setItem('todoapp', JSON.stringify(taskStore.tasks));
+    const initialTasks = JSON.parse(localStorage.getItem('todoapp') || '[]');
+    const taskStore = reactive(new TaskList(initialTasks), saveTasks);
+    saveTasks();
+    return taskStore;
 }
 
 // -------------------------------------------------------------------------
@@ -77,7 +85,7 @@ class Root extends Component {
     <div class="todo-app">
         <input placeholder="Enter a new task"  t-on-keyup="addTask" t-ref="add-input" />
         <div class="task-list">
-            <t t-foreach="store.task_list" t-as="task" t-key="task.id">
+            <t t-foreach="store.tasks" t-as="task" t-key="task.id">
                 <Task task="task" />
             </t>
         </div>
