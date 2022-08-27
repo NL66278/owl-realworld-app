@@ -12,6 +12,14 @@ import {
 console.log('hello owl', __info__.version);
 
 // -------------------------------------------------------------------------
+// Store
+// -------------------------------------------------------------------------
+function useStore() {
+    const env = useEnv();
+    return useState(env.store);
+}
+
+// -------------------------------------------------------------------------
 // Task List
 // -------------------------------------------------------------------------
 class TaskList {
@@ -74,7 +82,7 @@ class Task extends Component {
     static props = ['task'];
 
     setup() {
-        this.store = useEnv().store;
+        this.store = useStore();
     }
 }
 
@@ -120,7 +128,7 @@ class Root extends Component {
     setup() {
         const inputRef = useRef('add-input');
         onMounted(() => inputRef.el.focus());
-        this.store = useState(useEnv().store);
+        this.store = useStore();
         this.filter = useState({ value: 'all' });
     }
 
