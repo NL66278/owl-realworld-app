@@ -1,5 +1,10 @@
 # .prettierrc or .prettierrc.yaml
 trailingComma: 'es5'
+useTabs: false
 tabWidth: 4
-semi: false
+semi: true
 singleQuote: true
+bracketSpacing: false
+printWidth: 88
+proseWrap: always
+xmlWhitespaceSensitivity: 'strict'
