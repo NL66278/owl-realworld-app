@@ -7,4 +7,4 @@ singleQuote: true
 bracketSpacing: false
 printWidth: 88
 proseWrap: always
-xmlWhitespaceSensitivity: 'strict'
+htmlWhitespaceSensitivity: 'strict'
